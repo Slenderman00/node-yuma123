@@ -101,7 +101,88 @@ namespace yangrpc {
         args.GetReturnValue().Set(External::New(isolate, yangrpc_cb_ptr));
     }
 
+    void Exec(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        if (args.Length() < 2) {
+            ThrowError(isolate, "Wrong number of arguments");
+            return;
+        }
+
+        void* yangrpc_cb_ptr = External::Cast(*args[0])->Value();
+        void* rpc_val = External::Cast(*args[1])->Value();
+
+        val_value_t* reply_val;
+        status_t res = yangrpc_exec(
+            (yangrpc_cb_ptr_t)yangrpc_cb_ptr, 
+            (val_value_t*)rpc_val, 
+            &reply_val
+        );
+
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        
+        if (reply_val) {
+            result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, reply_val));
+        } else {
+            result->Set(isolate->GetCurrentContext(), 1, Null(isolate));
+        }
+        
+        args.GetReturnValue().Set(result);
+    }
+
+    void ParseCli(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        if (args.Length() < 2) {
+            ThrowError(isolate, "Wrong number of arguments");
+            return;
+        }
+
+        void* yangrpc_cb_ptr = External::Cast(*args[0])->Value();
+        char* cmd = ToCString(isolate, args[1]);
+
+        val_value_t* rpc_val;
+        status_t res = yangrpc_parse_cli(
+            (yangrpc_cb_ptr_t)yangrpc_cb_ptr, 
+            cmd, 
+            &rpc_val
+        );
+
+        free(cmd);
+
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        
+        if (rpc_val) {
+            result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, rpc_val));
+        } else {
+            result->Set(isolate->GetCurrentContext(), 1, Null(isolate));
+        }
+        
+        args.GetReturnValue().Set(result);
+    }
+
+
+    void Close(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+        
+        if (args.Length() < 1) {
+            ThrowError(isolate, "Wrong number of arguments");
+            return;
+        }
+        
+        void* yangrpc_cb_ptr = External::Cast(*args[0])->Value();
+        
+        yangrpc_close((yangrpc_cb_ptr_t)yangrpc_cb_ptr);
+        
+        args.GetReturnValue().SetUndefined();
+    }
+
     void InitYangRpc(Local<Object> exports) {
         NODE_SET_METHOD(exports, "connect", Connect);
+        NODE_SET_METHOD(exports, "rpc", Exec);
+        NODE_SET_METHOD(exports, "parse_cli", ParseCli);
+        NODE_SET_METHOD(exports, "close", Close);
     }
 }
