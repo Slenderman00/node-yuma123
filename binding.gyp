@@ -1,8 +1,11 @@
 {
   "targets": [
     {
-      "target_name": "yangrpc",
-      "sources": [ "src/yangrpc.cc" ],
+      "target_name": "yang",
+      "sources": [
+        "src/main.cc",
+        "src/yangrpc.cc"
+      ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")",
         "/usr/include/yuma/ncx",
@@ -10,7 +13,8 @@
         "/usr/include/yuma/yangrpc"
       ],
       "libraries": [
-        "-lyangrpc"
+        "-lyangrpc",
+        "-lyumancx"
       ],
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],

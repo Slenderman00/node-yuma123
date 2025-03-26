@@ -5,14 +5,16 @@
 #include <cstdlib>
 #include <cstddef>
 
-#include "ncx.h"
-#include "ncxmod.h"
-#include "ncxtypes.h"
-#include "status.h"
-#include "procdefs.h"
-#include "dlq.h"
-#include "rpc.h"
-#include "yangrpc.h"
+extern "C" {
+    #include "ncx.h"
+    #include "ncxmod.h"
+    #include "ncxtypes.h"
+    #include "status.h"
+    #include "procdefs.h"
+    #include "dlq.h"
+    #include "rpc.h"
+    #include "yangrpc.h"
+}
 
 namespace yangrpc {
     using v8::Context;
@@ -63,7 +65,6 @@ namespace yangrpc {
             return;
         }
 
-        //Extracting arguments
         char* server = ToCString(isolate, args[0]);
         int port = args[1]->Int32Value(context).FromJust();
         char* user = ToCString(isolate, args[2]);
@@ -98,5 +99,9 @@ namespace yangrpc {
         }
 
         args.GetReturnValue().Set(External::New(isolate, yangrpc_cb_ptr));
+    }
+
+    void InitYangRpc(Local<Object> exports) {
+        NODE_SET_METHOD(exports, "connect", Connect);
     }
 }
