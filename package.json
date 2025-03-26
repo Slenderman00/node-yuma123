@@ -1,10 +1,11 @@
 {
-  "name": "yuma123",
+  "name": "Yuma123",
   "version": "1.0.0",
-  "description": "Node.js bindings for the YUMA123 library",
+  "description": "Node.js bindings for the Yuma123 library",
   "main": "index.js",
   "scripts": {
     "test": "node test/basic.js",
+    "preinstall": "node scripts/check-dependencies.js",
     "install": "node-gyp rebuild"
   },
   "keywords": [
