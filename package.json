@@ -1,12 +1,23 @@
 {
   "name": "yuma123",
   "version": "1.0.0",
-  "description": "",
+  "description": "Node.js bindings for the YUMA123 library",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/basic.js",
+    "install": "node-gyp rebuild"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": [
+    "yang",
+    "netconf",
+    "yuma",
+    "yangrpc"
+  ],
+  "author": "Joar Heimonen",
+  "license": "ISC",
+  "gypfile": true,
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "node-addon-api": "^5.0.0"
+  }
 }
