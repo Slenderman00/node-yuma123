@@ -62,7 +62,7 @@ console.log(res);
 - `val_string(value)`: Retrieves the string representation of a value.
 - `val_dump_value(value, flag)`: Dumps the value for debugging purposes.
 - `val_dump_value_ex(value, flag, display_mode)`: Dumps the value for debugging purposes allows user to specify display mode.
-- `val_make_serialized_string(value, mode)`: Serializes a value into a string.
+- `val_make_serialized_string(value, mode)`: Serializes a value into a string. (Currently broken)
 - `val_free_value(value)`: Frees a value from memory.
 
 ## Dependencies
