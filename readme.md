@@ -71,7 +71,7 @@ console.log(res);
 - Yuma123 library
 
 ## TODO
-- implement: val_dump_value_ex to temporarily replace val_make_serialized_string [ ]
+- implement: val_dump_value_ex to temporarily replace val_make_serialized_string [x]
 - fix: val_make_serialized_string [ ]
 
 ## License
