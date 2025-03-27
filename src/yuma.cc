@@ -240,6 +240,23 @@ namespace yuma {
         args.GetReturnValue().SetNull();
     }
 
+    void ValDumpValueEx(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        int res;
+
+        if(args.Length() < 3) {
+            ThrowError(isolate, "Wrong number of arguments");
+        }
+
+        val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
+        int flag = args[1]->Int32Value(isolate->GetCurrentContext()).FromJust();
+        int display_mode = args[2]->Int32Value(isolate->GetCurrentContext()).FromJust();
+        val_dump_value_ex(val, flag, (ncx_display_mode_t)display_mode);
+
+        args.GetReturnValue().SetNull();
+    }
+
     void ValMakeSerializedString(const FunctionCallbackInfo<Value>& args) {
         Isolate* isolate = args.GetIsolate();
 
