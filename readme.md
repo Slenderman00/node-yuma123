@@ -11,7 +11,7 @@ Node-Yuma123 is a Node.js module providing bindings for the Yuma123 library, ena
 
 ## Installation
 
-To install Node-Yuma123, ensure you have Node.js and Node-gyp installed, then run:
+To install Node-Yuma123, ensure you have yuma123 installed, then run:
 
 ```bash
 npm i node-yuma123
