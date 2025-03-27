@@ -257,7 +257,12 @@ namespace yuma {
 
         Local<Array> result = Array::New(isolate, 2);
         result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
-        result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, str));
+        if (str) {
+            result->Set(isolate->GetCurrentContext(), 1, String::NewFromUtf8(isolate, str).ToLocalChecked());
+            free(str);
+        } else {
+            result->Set(isolate->GetCurrentContext(), 1, Null(isolate));
+        }
 
         args.GetReturnValue().Set(result);
     }
