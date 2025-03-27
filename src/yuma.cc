@@ -251,9 +251,9 @@ namespace yuma {
         }
 
         val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
-        ncx_display_mode_t* mode_ptr = (ncx_display_mode_t *) External::Cast(*args[1])->Value();
+        int mode = args[1]->Int32Value(isolate->GetCurrentContext()).FromJust();
 
-        res = val_make_serialized_string(val, *mode_ptr, (xmlChar**) &str);
+        res = val_make_serialized_string(val, (ncx_display_mode_t) mode, (xmlChar**) &str);
 
         Local<Array> result = Array::New(isolate, 2);
         result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
