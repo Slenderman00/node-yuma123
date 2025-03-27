@@ -86,20 +86,21 @@ namespace yuma {
         status_t res;
         ncx_module_t* module;
         char* module_name = NULL;
-        if (args.Length() != 0) {
+        if (args.Length() < 0) {
             module_name = ToCString(isolate, args[0]);
         }
 
         res = ncxmod_load_module((const xmlChar*)module_name, NULL, NULL, &module);
 
         if(res != 0) {
-            char *error;
+            char *error = (char *) malloc(strlen("Failed to load module: ") + strlen(module_name) + 1);
             if(module_name) {
                 sprintf(error, "Failed to load module: %s", module_name);
             } else {
                 sprintf(error, "Failed to load module");
             }
             ThrowError(isolate, error);
+            free(error);
         }
 
         Local<Array> result = Array::New(isolate, 2);
@@ -116,11 +117,127 @@ namespace yuma {
         free(module_name);
     }
 
-    void CFGload(const FunctionCallbackInfo<Value>& args) {
-        Isolate* Isolate = args.GetIsolate();
+    void CfgLoad(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
 
         status_t res;
+        int argc = 1;
+        char* argv[] = {"hello"};
+        char* cfg_filename;
+        char* startup_arg;
+        boolean showver;
+        help_mode_t showhelpmode;
+        agt_profile_t *profile;
+        cfg_template_t *runningcfg;
+
+        if(args.Length() < 1) {
+            cfg_filename = ToCString(isolate, args[0]);
+        } else {
+            ThrowError(isolate, "Wrong number of arguments");
+        }
+
+        startup_arg = (char *) malloc(strlen(cfg_filename) + 1);
+        sprintf(startup_arg, "%s", cfg_filename);
+
+        res = agt_init1(argc, argv, &showver, &showhelpmode);
         
+        if(res != 0) {
+            ThrowError(isolate, "Agt intialization failed");
+        }
+
+        if (showver || showhelpmode != HELP_MODE_NONE) {
+            printf("ver 1.0\n");
+        }
+
+        profile = agt_get_profile();
+        res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS, NULL, &profile->agt_savedevQ, NULL);
+
+        if(res != 0) {
+            ThrowError(isolate, "Failed to load module: NCXMOD_WITH_DEFAULTS");
+        }
+
+        profile->agt_has_startup = TRUE;
+        profile->agt_startup = (xmlChar *) startup_arg;
+
+        res = agt_init2();
+
+        if(res != 0) {
+            ThrowError(isolate, "Agt2 intialization failed");
+        }
+
+        runningcfg = cfg_get_config(NCX_CFG_RUNNING);
+
+        if(runningcfg == NULL) {
+            ThrowError(isolate, "Running cfg is NULL");
+        }
+
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, runningcfg->root));
+
+        args.GetReturnValue().Set(result);
+
+        free(startup_arg);
+    }
+
+    void ValFindChild(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        int res;
+        val_value_t* child_val;
+
+        if(args.Length() < 3) {
+            ThrowError(isolate, "Wrong number of arguments");
+        }
+
+        val_value_t* parent_val = (val_value_t *) External::Cast(*args[0])->Value();
+        char* _namespace = ToCString(isolate, args[1]);
+        char* name = ToCString(isolate, args[2]); 
+
+        child_val = val_find_child(parent_val, (xmlChar *) _namespace, (xmlChar *) name);
+
+        if(child_val==NULL) {
+            res=-1;
+        } else {
+            res=0;
+        }
+
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, child_val));
+
+        free(_namespace);
+        free(name);
+
+        args.GetReturnValue().Set(result);
+    }
+
+    void ValString(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        if(args.Length() < 1) {
+            ThrowError(isolate, "Wrong number of arguments");
+        }
+
+        val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
+    
+        args.GetReturnValue().Set(VAL_STRING(val));
+    }
+
+    void ValDumpValue(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        int res;
+
+        if(args.Length() < 2) {
+            ThrowError(isolate, "Wrong number of arguments");
+        }
+
+        val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
+        int flag = args[1]->Int32Value(isolate->GetCurrentContext()).FromJust();
+        val_dump_value(val, flag);
+
+        args.GetReturnValue().SetNull();
     }
 
     void InitYuma(Local<Object> exports) {
