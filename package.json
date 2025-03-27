@@ -1,6 +1,6 @@
 {
-  "name": "Yuma123",
-  "version": "1.0.0",
+  "name": "node-yuma123",
+  "version": "0.1.0",
   "description": "Node.js bindings for the Yuma123 library",
   "main": "index.js",
   "scripts": {
