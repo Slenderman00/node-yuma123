@@ -221,7 +221,7 @@ namespace yuma {
 
         val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
     
-        args.GetReturnValue().Set(VAL_STRING(val));
+        args.GetReturnValue().Set(External::New(isolate, VAL_STRING(val)));
     }
 
     void ValDumpValue(const FunctionCallbackInfo<Value>& args) {
@@ -240,9 +240,50 @@ namespace yuma {
         args.GetReturnValue().SetNull();
     }
 
+    void ValMakeSerializedString(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        status_t res;
+        char* str;
+
+        if(args.Length() < 2) {
+            ThrowError(isolate, "Wrong number of argumens");
+        }
+
+        val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
+        ncx_display_mode_t* mode_ptr = (ncx_display_mode_t *) External::Cast(*args[1])->Value();
+
+        res = val_make_serialized_string(val, *mode_ptr, (xmlChar**) &str);
+
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, str));
+
+        args.GetReturnValue().Set(result);
+    }
+    
+    void ValFreeValue(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+
+        if(args.Length() < 1) {
+            ThrowError(isolate, "Wrong number of argumens");
+        }
+
+        val_value_t* val = (val_value_t *) External::Cast(*args[0])->Value();
+        val_free_value(val);
+
+        args.GetReturnValue().SetNull();
+    }
+
     void InitYuma(Local<Object> exports) {
         NODE_SET_METHOD(exports, "init", Init);
         NODE_SET_METHOD(exports, "schema_module_load", SchemaModuleLoad);
+        NODE_SET_METHOD(exports, "cfg_load", CfgLoad);
+        NODE_SET_METHOD(exports, "val_find_child", ValFindChild);
+        NODE_SET_METHOD(exports, "val_string", ValString);
+        NODE_SET_METHOD(exports, "val_dump_value", ValDumpValue);
+        NODE_SET_METHOD(exports, "val_make_serialized_string", ValMakeSerializedString);
+        NODE_SET_METHOD(exports, "val_free_value", ValFreeValue);
     }
  
 }
