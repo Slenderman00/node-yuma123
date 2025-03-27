@@ -1,2 +1,2 @@
-const binding = require('./build/Release/yang');
-export default binding;
+const yuma123 = require('./build/Release/yang');
+module.exports = yuma123;
