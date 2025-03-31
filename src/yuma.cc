@@ -283,7 +283,7 @@ namespace yuma {
 
         args.GetReturnValue().Set(result);
     }
-    
+
     void ValFreeValue(const FunctionCallbackInfo<Value>& args) {
         Isolate* isolate = args.GetIsolate();
 
@@ -320,6 +320,7 @@ namespace yuma {
         NODE_SET_METHOD(exports, "val_dump_value", ValDumpValue);
         NODE_SET_METHOD(exports, "val_make_serialized_string", ValMakeSerializedString);
         NODE_SET_METHOD(exports, "val_free_value", ValFreeValue);
+        NODE_SET_METHOD(exports, "val_dump_value_ex", ValDumpValueEx);
 
         InitDisplayModeEnum(exports, isolate);
     }
