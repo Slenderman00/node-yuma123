@@ -62,7 +62,7 @@ console.log(res);
 - `val_string(value)`: Retrieves the string representation of a value.
 - `val_dump_value(value, flag)`: Dumps the value for debugging purposes.
 - `val_dump_value_ex(value, flag, display_mode)`: Dumps the value for debugging purposes allows user to specify display mode.
-- `val_make_serialized_string(value, mode)`: Serializes a value into a string. (Currently broken)
+- `val_make_serialized_string(value, mode)`: Serializes a value into a string. (Broken upstream, use https://github.com/Slenderman00/yuma123/tree/master)
 - `val_free_value(value)`: Frees a value from memory.
 
 ## Dependencies
@@ -72,8 +72,7 @@ console.log(res);
 - Yuma123 library
 
 ## TODO
-- [x] implement: val_dump_value_ex to temporarily replace val_make_serialized_string
-- [ ] fix: val_make_serialized_string
+- [x] fix: val_make_serialized_string
 
 ## License
 
