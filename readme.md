@@ -88,8 +88,4 @@ Contributions are welcome! Please submit issues or pull requests for any improve
 
 ## Support
 
-For support or questions, please contact the author or submit an issue on the GitHub repository.
-
----
-
-This README provides a comprehensive overview of the Node-Yuma123 project, including installation instructions, usage examples, API documentation, and other relevant information.
+Please open a ticket on the github page.
