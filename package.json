@@ -8,6 +8,10 @@
     "preinstall": "node scripts/check-dependencies.js",
     "install": "node-gyp rebuild"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Slenderman00/node-yuma123"
+  },
   "keywords": [
     "yang",
     "netconf",
