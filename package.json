@@ -1,11 +1,12 @@
 {
   "name": "node-yuma123",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Node.js bindings for the Yuma123 library",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "node test/basic.js",
-    "preinstall": "node scripts/check-dependencies.js",
+    "preinstall": "node scripts/check-dependencies.cjs",
     "install": "node-gyp rebuild"
   },
   "repository": {

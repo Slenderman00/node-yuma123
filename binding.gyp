@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "yang",
+      "target_name": "yuma123",
       "sources": [
         "src/main.cc",
         "src/yangrpc.cc",

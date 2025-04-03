@@ -15,5 +15,5 @@ const [rpcStatus, reply] = yuma123.yangrpc.rpc(connection, rpcData);
 console.log("Command executed:", rpcStatus === 0 ? "successfully" : "failed");
 
 yuma123.yuma.init();
-const [res, output] = yuma123.yuma.val_make_serialized_string(reply, 5);
+const [res, output] = yuma123.yuma.val_make_serialized_string(reply, NCX_DISPLAY_MODE_XML_NONS);
 console.log(output)
