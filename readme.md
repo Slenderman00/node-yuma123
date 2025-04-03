@@ -24,7 +24,7 @@ This will build the native module using Node-gyp.
 Below is a basic example of how to use Node-Yuma123 in your Node.js application:
 
 ```javascript
-const yuma123 = require('node-yuma123');
+import { yuma123 } from "../index.js";
 
 const server = "127.0.0.1";
 const port = 830;
@@ -40,8 +40,21 @@ console.log("Command parsed:", cliStatus === 0 ? "yes" : "no");
 const [rpcStatus, reply] = yuma123.yangrpc.rpc(connection, rpcData);
 console.log("Command executed:", rpcStatus === 0 ? "successfully" : "failed");
 
-const res = yuma123.yuma.init();
-console.log(res);
+yuma123.yuma.init();
+const [res, output] = yuma123.yuma.val_make_serialized_string(reply, NCX_DISPLAY_MODE_XML_NONS);
+console.log(output)
+```
+Or using the yangcli wrapper:
+```javascript
+import { yuma123, yangcli } from "../index.js";
+
+const server = "127.0.0.1";
+const port = 830;
+const username = "user";
+const password = "pass";
+const connection = yuma123.yangrpc.connect(server, port, username, password, null, null, null);
+
+let res = yangcli(connection, "xget /", yuma123.NCX_DISPLAY_MODE_PLAIN);
 ```
 
 ## API
@@ -64,6 +77,9 @@ console.log(res);
 - `val_dump_value_ex(value, flag, display_mode)`: Dumps the value for debugging purposes allows user to specify display mode.
 - `val_make_serialized_string(value, mode)`: Serializes a value into a string.
 - `val_free_value(value)`: Frees a value from memory.
+
+### yangcli
+- `yangcli(connection, command, mode)`: Wrapper for sending an RPC request and serializing the response
 
 ## Dependencies
 
