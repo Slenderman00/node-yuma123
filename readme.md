@@ -24,7 +24,7 @@ This will build the native module using Node-gyp.
 Below is a basic example of how to use Node-Yuma123 in your Node.js application:
 
 ```javascript
-import { yuma123 } from "../index.js";
+import { yuma123 } from "node-yuma123";
 
 const server = "127.0.0.1";
 const port = 830;
@@ -46,7 +46,7 @@ console.log(output)
 ```
 Or using the yangcli wrapper:
 ```javascript
-import { yuma123, yangcli } from "../index.js";
+import { yuma123, yangcli } from "node-yuma123";
 
 const server = "127.0.0.1";
 const port = 830;
