@@ -297,21 +297,7 @@ namespace yuma {
         args.GetReturnValue().SetNull();
     }
 
-    void InitDisplayModeEnum(Local<Object> exports, Isolate* isolate) {
-        Local<Object> displayModeEnum = Object::New(isolate);
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_NONE").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_NONE)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_PLAIN").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_PLAIN)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_PREFIX").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_PREFIX)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_MODULE").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_MODULE)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_XML").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_XML)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_XML_NONS").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_XML_NONS)).Check();
-        displayModeEnum->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "NCX_DISPLAY_MODE_JSON").ToLocalChecked(), Integer::New(isolate, NCX_DISPLAY_MODE_JSON)).Check();
-        exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "DisplayMode").ToLocalChecked(), displayModeEnum).Check();
-    }
-
     void InitYuma(Local<Object> exports) {
-        Isolate* isolate = exports->GetIsolate();
-
         NODE_SET_METHOD(exports, "init", Init);
         NODE_SET_METHOD(exports, "schema_module_load", SchemaModuleLoad);
         NODE_SET_METHOD(exports, "cfg_load", CfgLoad);
@@ -321,8 +307,6 @@ namespace yuma {
         NODE_SET_METHOD(exports, "val_make_serialized_string", ValMakeSerializedString);
         NODE_SET_METHOD(exports, "val_free_value", ValFreeValue);
         NODE_SET_METHOD(exports, "val_dump_value_ex", ValDumpValueEx);
-
-        InitDisplayModeEnum(exports, isolate);
     }
  
 }
