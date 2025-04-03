@@ -83,8 +83,8 @@ let res = yangcli(connection, "xget /", yuma123.NCX_DISPLAY_MODE_PLAIN);
 
 ## Dependencies
 
-- Node.js
 - Node-gyp
+- bindings
 - Yuma123 library
 
 ## TODO
