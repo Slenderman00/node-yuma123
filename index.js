@@ -1,5 +1,5 @@
 import bindings from "bindings";
-import { getErrorMessage } from "./error-codes";
+import { getErrorMessage } from "./error-codes.js";
 const yuma123 = bindings('yuma123');
 
 const NCX_DISPLAY_MODE_NONE = 0
@@ -13,22 +13,22 @@ const NCX_DISPLAY_MODE_JSON = 6
 const yangcli = (connection, cmd, displaymode = NCX_DISPLAY_MODE_XML_NONS) => {
     const [cliStatus, rpcData] = yuma123.yangrpc.parse_cli(connection, cmd);
 
-    if (!cliStatus) {
+    if (cliStatus != 0) {
         throw new Error(getErrorMessage(cliStatus))
     }
 
     const [rpcStatus, reply] = yuma123.yangrpc.rpc(connection, rpcData);
 
-    if (!rpcStatus) {
+    if (rpcStatus != 0) {
         throw new Error(getErrorMessage(rpcStatus))
     }
 
     yuma123.yuma.init();
     const [res, output] = yuma123.yuma.val_make_serialized_string(reply, displaymode);
-    val_free_value(reply);
-    val_free_value(rpcData);
+    yuma123.yuma.val_free_value(reply);
+    yuma123.yuma.val_free_value(rpcData);
 
-    if (!res) {
+    if (res != 0) {
         throw new Error(getErrorMessage(res))
     }
 
