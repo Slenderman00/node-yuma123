@@ -46,6 +46,7 @@ const yangcli = (connection, cmd, displaymode = NCX_DISPLAY_MODE_XML_NONS) => {
 }
 
 export {
+    safeConnect,
     yangcli,
     yuma123,
     NCX_DISPLAY_MODE_NONE,
