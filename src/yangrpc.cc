@@ -92,13 +92,17 @@ namespace yangrpc {
         free(public_key);
         free(private_key);
         if (other_args) free(other_args);
-        
-        if (res != NO_ERR) {
-            args.GetReturnValue().SetNull();
-            return;
-        }
 
-        args.GetReturnValue().Set(External::New(isolate, yangrpc_cb_ptr));
+        Local<Array> result = Array::New(isolate, 2);
+        result->Set(isolate->GetCurrentContext(), 0, Number::New(isolate, res));
+        
+        if (yangrpc_cb_ptr) {
+            result->Set(isolate->GetCurrentContext(), 1, External::New(isolate, yangrpc_cb_ptr));
+        } else {
+            result->Set(isolate->GetCurrentContext(), 1, Null(isolate));
+        }
+        
+        args.GetReturnValue().Set(result);
     }
 
     void Rpc(const FunctionCallbackInfo<Value>& args) {

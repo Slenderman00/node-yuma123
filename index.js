@@ -10,6 +10,16 @@ const NCX_DISPLAY_MODE_XML = 4
 const NCX_DISPLAY_MODE_XML_NONS = 5
 const NCX_DISPLAY_MODE_JSON = 6
 
+const safeConnect = (server, port, username, password, privateKeyPath=null, publicKeyPath=null, other_args=null) => {
+    const [connectionStatus, connection] = yuma123.yangrpc.connect(server, port, username, password, privateKeyPath, publicKeyPath, other_args);
+
+    if (connectionStatus != 0) {
+        throw new Error(getErrorMessage(connectionStatus))
+    }
+
+    return connection;
+}
+
 const yangcli = (connection, cmd, displaymode = NCX_DISPLAY_MODE_XML_NONS) => {
     const [cliStatus, rpcData] = yuma123.yangrpc.parse_cli(connection, cmd);
 
