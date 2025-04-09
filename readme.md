@@ -1,11 +1,11 @@
 # Node-Yuma123
 
-Node-Yuma123 is a Node.js module providing bindings for the Yuma123 library, enabling interaction with YANG models and NETCONF protocols. This project facilitates the integration of Yuma123 functionalities into Node.js applications, allowing developers to leverage YANG and NETCONF capabilities in a JavaScript environment.
+Node-Yuma123 is a Node.js module providing bindings for the Yuma123 library, enabling interaction with YANG models and the NETCONF protocol. This project facilitates the integration of Yuma123 functionalities into Node.js applications, allowing developers to leverage YANG and NETCONF capabilities in a JavaScript environment.
 
 ## Features
 
 - Connect to NETCONF servers using Yuma123.
-- Execute RPC commands and parse CLI commands.
+- Execute RPC commands and parse yangcli commands.
 - Load and manage YANG modules and configurations.
 - Interact with YANG data structures and serialize them.
 
@@ -79,7 +79,8 @@ let res = yangcli(connection, "xget /", yuma123.NCX_DISPLAY_MODE_PLAIN);
 - `val_free_value(value)`: Frees a value from memory.
 
 ### yangcli
-- `yangcli(connection, command, mode)`: Wrapper for sending an RPC request and serializing the response
+- `safeConnect(server, port, username, password, public_key, private_key, other_args)`: Wrapper that connects to a NETCONF server and performs error checking.
+- `yangcli(connection, command, mode)`: Wrapper that parses a yangcli command and sends an RPC request.
 
 ## Dependencies
 
