@@ -175,6 +175,8 @@ namespace yangrpc {
         void* yangrpc_cb_ptr = External::Cast(*args[0])->Value();
         
         yangrpc_close((yangrpc_cb_ptr_t)yangrpc_cb_ptr);
+
+        yangrpc_init_done = 0;
         
         args.GetReturnValue().SetUndefined();
     }
