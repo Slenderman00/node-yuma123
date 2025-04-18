@@ -166,6 +166,11 @@ namespace yangrpc {
 
     void Close(const FunctionCallbackInfo<Value>& args) {
         Isolate* isolate = args.GetIsolate();
+
+        if(!yangrpc_init_done) {
+            ThrowError(isolate, "Connection already closed");
+            return;
+        }
         
         if (args.Length() < 1) {
             ThrowError(isolate, "Wrong number of arguments");
