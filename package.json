@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node test/basic.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "preinstall": "node scripts/check-dependencies.cjs",
     "install": "node-gyp rebuild"
   },
@@ -25,5 +25,8 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "node-addon-api": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

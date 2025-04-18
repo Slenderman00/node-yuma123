@@ -1,0 +1,1 @@
+podman build -t test-suite -f Containerfile . && podman run -it test-suite
