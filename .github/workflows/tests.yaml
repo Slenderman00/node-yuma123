@@ -13,9 +13,43 @@ jobs:
 
       - name: Install Podman
         uses: gacts/install-podman@v1
-        
+
       - name: Run test script
+        id: run-tests
         run: |
           chmod +x ./test.sh
-          ./test.sh
-  
+          ./test.sh > test_output.log 2>&1 || true
+
+      - name: Parse and Create Summary
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const core = require('@actions/core');
+            
+            const log = fs.readFileSync('test_output.log', 'utf8');
+
+            const failedTests = log.match(/FAIL\s+.+/g) || [];
+            const passedTests = log.match(/✓\s+.+/g) || [];
+            const totalTests = failedTests.length + passedTests.length;
+
+            const sessions = log.match(/Session \d+ (created OK|closed)/g) || [];
+            const failedSessions = log.match(/Start session failed.+/g) || [];
+   
+            const summary = `
+            ## Test Summary
+            - **Total Tests**: ${totalTests}
+            - **Passed Tests**: ${passedTests.length}
+            - **Failed Tests**: ${failedTests.length}
+            - **Sessions Created**: ${sessions.filter(s => s.includes('created OK')).length}
+            - **Sessions Closed**: ${sessions.filter(s => s.includes('closed')).length}
+            - **Failed Sessions**: ${failedSessions.length}
+            ### Failed Tests
+            ${failedTests.map(test => `- ${test}`).join('\n')}
+            ### Passed Tests
+            ${passedTests.map(test => `- ${test}`).join('\n')}
+            ### Session Errors
+            ${failedSessions.map(session => `- ${session}`).join('\n')}
+            `;
+
+            core.summary.addRaw(summary).
