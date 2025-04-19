@@ -18,15 +18,14 @@ jobs:
         id: run-tests
         run: |
           chmod +x ./test.sh
-          ./test.sh > test_output.log 2>&1 || true
+          ./test.sh 2>&1 | tee test_output.log || true
 
       - name: Parse and Create Summary
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const core = require('@actions/core');
-            
+
             const log = fs.readFileSync('test_output.log', 'utf8');
 
             const failedTests = log.match(/FAIL\s+.+/g) || [];
