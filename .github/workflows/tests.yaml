@@ -19,6 +19,7 @@ jobs:
         run: |
           chmod +x ./test.sh
           ./test.sh 2>&1 | tee test_output.log
+          exit ${PIPESTATUS[0]}
 
       - name: Parse and Create Summary
         if: always()
