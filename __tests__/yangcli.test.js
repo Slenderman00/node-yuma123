@@ -46,4 +46,33 @@ describe('NETCONF Connection Tests', () => {
     
     closeSpy.mockRestore();
   });
+
+  test('should successfully connect asynchronously', async () => {
+    const asyncConnection = await yuma123.yangrpc.async_connect(
+      server,
+      port,
+      username,
+      password,
+      null,
+      null,
+      null
+    );
+
+    expect(asyncConnection).not.toBeNull();
+    yuma123.yangrpc.close(asyncConnection);
+  });
+
+  test('should fail to connect asynchronously with invalid server', async () => {
+    await expect(
+      yuma123.yangrpc.async_connect(
+        "bad-server",
+        port,
+        username,
+        password,
+        null,
+        null,
+        null
+      )
+    ).rejects.toMatchObject({ code: expect.any(Number) });
+  });
 });

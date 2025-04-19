@@ -4,6 +4,7 @@
 #include <string.h>
 #include <cstdlib>
 #include <cstddef>
+#include <uv.h>
 
 extern "C" {
     #include "ncx.h"
@@ -33,8 +34,10 @@ namespace yangrpc {
     using v8::Array;
     using v8::Integer;
     using v8::Boolean;
+    using v8::Promise;
+    using v8::Persistent;
+    using v8::HandleScope;
     
-
     static int yangrpc_init_done = 0;
 
     char* ToCString(Isolate* isolate, Local<Value> value) {
@@ -103,6 +106,115 @@ namespace yangrpc {
         }
         
         args.GetReturnValue().Set(result);
+    }
+
+    struct ConnectBaton {
+        char* server;
+        int port;
+        char* user;
+        char* password;
+        char* public_key;
+        char* private_key;
+        char* other_args;
+        yangrpc_cb_ptr_t yangrpc_cb_ptr;
+        status_t res;
+        Persistent<Promise::Resolver> resolver;
+        Isolate* isolate;
+    };
+
+    static void ConnectWork(uv_work_t* req) {
+        ConnectBaton* baton = static_cast<ConnectBaton*>(req->data);
+        
+        baton->res = yangrpc_connect(
+            baton->server, 
+            baton->port, 
+            baton->user, 
+            baton->password, 
+            baton->public_key, 
+            baton->private_key, 
+            baton->other_args, 
+            &baton->yangrpc_cb_ptr
+        );
+    }
+
+    static void ConnectAfter(uv_work_t* req, int status) {
+        Isolate* isolate = Isolate::GetCurrent();
+        HandleScope scope(isolate);
+        
+        ConnectBaton* baton = static_cast<ConnectBaton*>(req->data);
+        
+        Local<Promise::Resolver> resolver = Local<Promise::Resolver>::New(
+            isolate, baton->resolver);
+        Local<Context> context = isolate->GetCurrentContext();
+        
+        if (baton->res == NO_ERR && baton->yangrpc_cb_ptr) {
+            resolver->Resolve(context, External::New(isolate, baton->yangrpc_cb_ptr));
+        } else {
+            Local<Object> errorObj = Object::New(isolate);
+            errorObj->Set(
+                context, 
+                String::NewFromUtf8(isolate, "code").ToLocalChecked(),
+                Number::New(isolate, baton->res)
+            );
+            resolver->Reject(context, errorObj);
+        }
+        
+        baton->resolver.Reset();
+        free(baton->server);
+        free(baton->user);
+        free(baton->password);
+        if (baton->public_key) free(baton->public_key);
+        if (baton->private_key) free(baton->private_key);
+        if (baton->other_args) free(baton->other_args);
+        delete baton;
+        delete req;
+    }
+
+    void AsyncConnect(const FunctionCallbackInfo<Value>& args) {
+        Isolate* isolate = args.GetIsolate();
+        Local<Context> context = isolate->GetCurrentContext();
+
+        if (args.Length() < 6) {
+            ThrowError(isolate, "Wrong number of arguments");
+            return;
+        }
+
+        Local<Promise::Resolver> resolver = Promise::Resolver::New(context).ToLocalChecked();
+        Local<Promise> promise = resolver->GetPromise();
+        args.GetReturnValue().Set(promise);
+        
+        ConnectBaton* baton = new ConnectBaton();
+        baton->server = ToCString(isolate, args[0]);
+        baton->port = args[1]->Int32Value(context).FromJust();
+        baton->user = ToCString(isolate, args[2]);
+        baton->password = ToCString(isolate, args[3]);
+        baton->public_key = ToCString(isolate, args[4]);
+        baton->private_key = ToCString(isolate, args[5]);
+        
+        baton->other_args = nullptr;
+        if (args.Length() > 6 && !args[6]->IsNullOrUndefined()) {
+            baton->other_args = ToCString(isolate, args[6]);
+        }
+        
+        baton->yangrpc_cb_ptr = nullptr;
+        baton->isolate = isolate;
+        baton->resolver.Reset(isolate, resolver);
+        
+        if (yangrpc_init_done == 0) {
+            status_t res = yangrpc_init(NULL);
+            assert(res == NO_ERR);
+            yangrpc_init_done = 1;
+        }
+        
+        uv_work_t* req = new uv_work_t();
+        req->data = baton;
+        
+        uv_queue_work(
+            uv_default_loop(),
+            req,
+            ConnectWork,
+            ConnectAfter
+        );
     }
 
     void Rpc(const FunctionCallbackInfo<Value>& args) {
@@ -188,6 +300,7 @@ namespace yangrpc {
 
     void InitYangRpc(Local<Object> exports) {
         NODE_SET_METHOD(exports, "connect", Connect);
+        NODE_SET_METHOD(exports, "async_connect", AsyncConnect);
         NODE_SET_METHOD(exports, "rpc", Rpc);
         NODE_SET_METHOD(exports, "parse_cli", ParseCli);
         NODE_SET_METHOD(exports, "close", Close);
