@@ -1,57 +1,107 @@
 name: Run Tests
+
 on:
   push:
     branches:
       - main
   pull_request:
+
 jobs:
-  install-podman:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+      
       - name: Install Podman
         uses: gacts/install-podman@v1
+    
+    outputs:
+      setup-success: ${{ steps.setup-check.outputs.result }}
 
+  run-tests:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install Podman
+        uses: gacts/install-podman@v1
+      
       - name: Run test script
         id: run-tests
         run: |
           chmod +x ./test.sh
           ./test.sh 2>&1 | tee test_output.log
-          exit ${PIPESTATUS[0]}
-
+          echo "TESTS_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_ENV
+      
+      - name: Upload test logs as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: test_output.log
+          retention-days: 7
+      
       - name: Parse and Create Summary
         if: always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
-            const log = fs.readFileSync('test_output.log', 'utf8');
-
-            const cleanLog = log.replace(/\x1b\[[0-9;]*m/g, '');
-
-            const failedTests = cleanLog.match(/FAIL\s+.+/g) || [];
-            const passedTests = cleanLog.match(/✓\s+.+/g) || [];
-            const totalTests = failedTests.length + passedTests.length;
-
-            const sessions = cleanLog.match(/Session \d+ (created OK|closed)/gi) || [];
-            const failedSessions = cleanLog.match(/Start session failed.+/g) || [];
-
-            const summary = `
-            ## Test Summary
-            - **Total Tests**: ${totalTests}
-            - **Passed Tests**: ${passedTests.length}
-            - **Failed Tests**: ${failedTests.length}
-            - **Sessions Created**: ${sessions.filter(s => s.includes('created OK')).length}
-            - **Sessions Closed**: ${sessions.filter(s => s.includes('closed')).length}
-            - **Failed Sessions**: ${failedSessions.length}
-            ### Failed Tests
-            ${failedTests.length > 0 ? failedTests.map(test => `- ${test}`).join('\n') : 'None'}
-            ### Passed Tests
-            ${passedTests.length > 0 ? passedTests.map(test => `- ${test}`).join('\n') : 'None'}
-            ### Session Errors
-            ${failedSessions.length > 0 ? failedSessions.map(session => `- ${session}`).join('\n') : 'None'}
-            `;
-
-            core.summary.addRaw(summary).write();
+            try {
+              const log = fs.readFileSync('test_output.log', 'utf8');
+              // Strip ANSI color codes for better parsing
+              const cleanLog = log.replace(/\x1b\[[0-9;]*m/g, '');
+              
+              // Parse test results
+              const failedTests = cleanLog.match(/FAIL\s+.+/g) || [];
+              const passedTests = cleanLog.match(/✓\s+.+/g) || [];
+              const totalTests = failedTests.length + passedTests.length;
+              
+              // Parse session information
+              const sessionsCreated = (cleanLog.match(/Session \d+ created OK/gi) || []).length;
+              const sessionsClosed = (cleanLog.match(/Session \d+ closed/gi) || []).length;
+              const failedSessions = cleanLog.match(/Start session failed.+/g) || [];
+              
+              // Create status badge based on results
+              const statusBadge = failedTests.length > 0 ? 
+                '❌ Some tests failed' : 
+                '✅ All tests passed';
+              
+              // Create summary with more detailed formatting
+              const summary = `
+              # Test Results ${statusBadge}
+              
+              ## Test Summary
+              - **Total Tests**: ${totalTests}
+              - **Passed Tests**: ${passedTests.length}
+              - **Failed Tests**: ${failedTests.length}
+              - **Sessions Created**: ${sessionsCreated}
+              - **Sessions Closed**: ${sessionsClosed}
+              - **Failed Sessions**: ${failedSessions.length}
+              
+              ${failedTests.length > 0 ? '## Failed Tests\n' + failedTests.map(test => `- ${test}`).join('\n') : ''}
+              
+              ${failedSessions.length > 0 ? '## Session Errors\n' + failedSessions.map(session => `- ${session}`).join('\n') : ''}
+              `;
+              
+              core.summary.addRaw(summary).write();
+              
+              // Set output for use in future steps or jobs
+              core.setOutput('failed-tests', failedTests.length);
+              core.setOutput('passed-tests', passedTests.length);
+              
+            } catch (error) {
+              core.setFailed(`Error parsing test results: ${error.message}`);
+            }
+      
+      - name: Check test results
+        if: always()
+        run: |
+          if [[ "${{ env.TESTS_EXIT_CODE }}" != "0" ]]; then
+            echo "Tests failed with exit code ${{ env.TESTS_EXIT_CODE }}"
+            exit 1
+          fi
+          echo "All tests passed!"
