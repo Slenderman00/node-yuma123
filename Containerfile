@@ -32,7 +32,7 @@ RUN chmod +x /entrypoint.sh
 
 RUN mkdir node-yuma123
 COPY . /node-yuma123
-RUN cd /node-yuma123 && rm -rf node_modules && rm package-lock.json
+RUN cd /node-yuma123 && rm -rf node_modules || true && rm package-lock.json || true
 
 WORKDIR /node-yuma123
 RUN npm install
