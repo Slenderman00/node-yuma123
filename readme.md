@@ -1,5 +1,7 @@
 # Node-Yuma123
 
+[![Run Tests](https://github.com/Slenderman00/node-yuma123/actions/workflows/tests.yaml/badge.svg)](https://github.com/Slenderman00/node-yuma123/actions/workflows/tests.yaml)
+
 Node-Yuma123 is a Node.js module providing bindings for the Yuma123 library, enabling interaction with YANG models and the NETCONF protocol. This project facilitates the integration of Yuma123 functionalities into Node.js applications, allowing developers to leverage YANG and NETCONF capabilities in a JavaScript environment.
 
 ## Features
