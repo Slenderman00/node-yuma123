@@ -25,16 +25,12 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-
             const log = fs.readFileSync('test_output.log', 'utf8');
-
             const failedTests = log.match(/FAIL\s+.+/g) || [];
             const passedTests = log.match(/✓\s+.+/g) || [];
             const totalTests = failedTests.length + passedTests.length;
-
             const sessions = log.match(/Session \d+ (created OK|closed)/g) || [];
             const failedSessions = log.match(/Start session failed.+/g) || [];
-   
             const summary = `
             ## Test Summary
             - **Total Tests**: ${totalTests}
@@ -50,5 +46,4 @@ jobs:
             ### Session Errors
             ${failedSessions.map(session => `- ${session}`).join('\n')}
             `;
-
-            core.summary.addRaw(summary).
+            core.summary.addRaw(summary).write();
