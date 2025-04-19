@@ -18,19 +18,25 @@ jobs:
         id: run-tests
         run: |
           chmod +x ./test.sh
-          ./test.sh 2>&1 | tee test_output.log || true
+          ./test.sh 2>&1 | tee test_output.log
 
       - name: Parse and Create Summary
+        if: always()
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const log = fs.readFileSync('test_output.log', 'utf8');
-            const failedTests = log.match(/FAIL\s+.+/g) || [];
-            const passedTests = log.match(/✓\s+.+/g) || [];
+
+            const cleanLog = log.replace(/\x1b\[[0-9;]*m/g, '');
+
+            const failedTests = cleanLog.match(/FAIL\s+.+/g) || [];
+            const passedTests = cleanLog.match(/✓\s+.+/g) || [];
             const totalTests = failedTests.length + passedTests.length;
-            const sessions = log.match(/Session \d+ (created OK|closed)/g) || [];
-            const failedSessions = log.match(/Start session failed.+/g) || [];
+
+            const sessions = cleanLog.match(/Session \d+ (created OK|closed)/g) || [];
+            const failedSessions = cleanLog.match(/Start session failed.+/g) || [];
+
             const summary = `
             ## Test Summary
             - **Total Tests**: ${totalTests}
@@ -40,10 +46,11 @@ jobs:
             - **Sessions Closed**: ${sessions.filter(s => s.includes('closed')).length}
             - **Failed Sessions**: ${failedSessions.length}
             ### Failed Tests
-            ${failedTests.map(test => `- ${test}`).join('\n')}
+            ${failedTests.length > 0 ? failedTests.map(test => `- ${test}`).join('\n') : 'None'}
             ### Passed Tests
-            ${passedTests.map(test => `- ${test}`).join('\n')}
+            ${passedTests.length > 0 ? passedTests.map(test => `- ${test}`).join('\n') : 'None'}
             ### Session Errors
-            ${failedSessions.map(session => `- ${session}`).join('\n')}
+            ${failedSessions.length > 0 ? failedSessions.map(session => `- ${session}`).join('\n') : 'None'}
             `;
+
             core.summary.addRaw(summary).write();
