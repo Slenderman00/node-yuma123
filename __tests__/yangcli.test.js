@@ -46,8 +46,4 @@ describe('NETCONF Connection Tests', () => {
     
     closeSpy.mockRestore();
   });
-
-  test('this test should always fail', () => {
-    expect(true).toBe(false);
-  });
 });
