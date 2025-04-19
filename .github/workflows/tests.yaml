@@ -35,7 +35,7 @@ jobs:
             const passedTests = cleanLog.match(/✓\s+.+/g) || [];
             const totalTests = failedTests.length + passedTests.length;
 
-            const sessions = cleanLog.match(/Session \d+ (created OK|closed)/g) || [];
+            const sessions = cleanLog.match(/Session \d+ (created OK|closed)/gi) || [];
             const failedSessions = cleanLog.match(/Start session failed.+/g) || [];
 
             const summary = `
