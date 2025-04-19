@@ -36,14 +36,6 @@ jobs:
           ./test.sh 2>&1 | tee test_output.log
           echo "TESTS_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_ENV
       
-      - name: Upload test logs as artifact
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-logs
-          path: test_output.log
-          retention-days: 7
-      
       - name: Parse and Create Summary
         if: always()
         uses: actions/github-script@v6
