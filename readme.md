@@ -195,9 +195,9 @@ Tests are also automatically run in CI via GitHub Actions using the same contain
 
 This project is licensed under the ISC License.
 
-## Author
+## Authors
 
-Joar Heimonen
+- [@slenderman00](https://github.com/Slenderman00)
 
 ## Contributing
 
